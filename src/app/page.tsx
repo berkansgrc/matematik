@@ -53,7 +53,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await login(values.email, values.password);
-      router.push('/courses');
+      router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",

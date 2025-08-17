@@ -59,7 +59,7 @@ export default function RegisterPage() {
         title: "Success",
         description: "Your account has been created.",
       });
-      router.push('/courses');
+      router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
