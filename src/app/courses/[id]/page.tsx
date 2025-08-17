@@ -2,11 +2,21 @@ import { courses } from '@/lib/data';
 import type { Course } from '@/lib/types';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { Book, Clock } from 'lucide-react';
+import { Book, Clock, Youtube, FileText, Link as LinkIcon } from 'lucide-react';
 import CourseProgress from './course-progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from '@/components/ui/card';
 
 async function getCourse(id: string): Promise<Course | undefined> {
   return courses.find((course) => course.id === id);
+}
+
+const getIcon = (type: string) => {
+    switch(type) {
+      case 'youtube': return <Youtube className="h-5 w-5 text-red-500" />;
+      case 'drive': return <FileText className="h-5 w-5 text-blue-500" />;
+      case 'iframe': return <LinkIcon className="h-5 w-5 text-gray-500" />;
+    }
 }
 
 export default async function CourseDetailPage({ params }: { params: { id: string } }) {
@@ -22,8 +32,8 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
   }, 0);
 
   return (
-    <div className="container max-w-5xl mx-auto py-8">
-       <div className="grid md:grid-cols-3 gap-8">
+    <div className="container max-w-6xl mx-auto py-8">
+       <div className="grid md:grid-cols-3 gap-8 items-start">
         <div className="md:col-span-2">
             <div className="relative aspect-video rounded-lg overflow-hidden mb-6">
                 <Image
@@ -45,9 +55,41 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
                     <span>Approx. {Math.floor(totalDuration / 60)}h {totalDuration % 60}m</span>
                 </div>
             </div>
-            <p className="text-lg text-muted-foreground">{course.description}</p>
+            <p className="text-lg text-muted-foreground mb-8">{course.description}</p>
+            
+            {course.content.length > 0 && (
+                <Tabs defaultValue={course.content[0].id} className="w-full">
+                    <TabsList className="grid w-full grid-cols-3 mb-4">
+                        {course.content.map(item => (
+                            <TabsTrigger key={item.id} value={item.id} className="flex gap-2 items-center">
+                               {getIcon(item.type)} {item.title}
+                            </TabsTrigger>
+                        ))}
+                    </TabsList>
+                     {course.content.map(item => (
+                        <TabsContent key={item.id} value={item.id}>
+                            <Card>
+                                <CardContent className="p-0">
+                                   <div className="aspect-video">
+                                        <iframe
+                                            src={item.embedUrl}
+                                            width="100%"
+                                            height="100%"
+                                            className="rounded-md"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                            title={item.title}
+                                        ></iframe>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    ))}
+                </Tabs>
+            )}
+
         </div>
-        <div className="md:col-span-1">
+        <div className="md:col-span-1 sticky top-20">
             <CourseProgress course={course} />
         </div>
       </div>

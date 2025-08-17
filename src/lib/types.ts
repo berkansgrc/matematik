@@ -16,21 +16,6 @@ export interface Section {
   lessons: Lesson[];
 }
 
-export interface Course {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  imageUrl: string;
-  sections: Section[];
-}
-
-export interface UserProgress {
-  [courseId: string]: {
-    completedLessons: string[];
-  };
-}
-
 export type EmbedType = 'youtube' | 'drive' | 'iframe';
 
 export interface EmbeddableContent {
@@ -39,4 +24,20 @@ export interface EmbeddableContent {
   type: EmbedType;
   url: string;
   embedUrl: string;
+}
+
+export interface Course {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  imageUrl: string;
+  sections: Section[];
+  content: EmbeddableContent[];
+}
+
+export interface UserProgress {
+  [courseId: string]: {
+    completedLessons: string[];
+  };
 }

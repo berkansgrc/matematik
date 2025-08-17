@@ -10,8 +10,7 @@ import {
   CardContent, 
   CardDescription, 
   CardHeader, 
-  CardTitle,
-  CardFooter
+  CardTitle
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,12 +29,19 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input";
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from "@/hooks/use-toast";
-import { embeddableContent as initialContent } from '@/lib/data';
-import type { EmbeddableContent, EmbedType } from '@/lib/types';
-import { Youtube, FileText, Link as LinkIcon, PlusCircle, Trash2 } from 'lucide-react';
+import { courses as initialCourses } from '@/lib/data';
+import type { Course, EmbeddableContent, EmbedType } from '@/lib/types';
+import { Youtube, FileText, Link as LinkIcon, PlusCircle, Trash2, Edit, ArrowLeft } from 'lucide-react';
 
-const formSchema = z.object({
+const courseFormSchema = z.object({
+  title: z.string().min(3, { message: "Başlık en az 3 karakter olmalıdır." }),
+  description: z.string().min(10, { message: "Açıklama en az 10 karakter olmalıdır." }),
+  category: z.enum(["5. Sınıf", "6. Sınıf", "7. Sınıf", "LGS"], { required_error: "Kategori seçmelisiniz." }),
+});
+
+const contentFormSchema = z.object({
   title: z.string().min(3, { message: "Başlık en az 3 karakter olmalıdır." }),
   type: z.enum(["youtube", "drive", "iframe"], { required_error: "İçerik türü seçmelisiniz." }),
   url: z.string().url({ message: "Geçerli bir URL girmelisiniz." }),
@@ -43,14 +49,18 @@ const formSchema = z.object({
 
 export default function AdminPage() {
   const { toast } = useToast();
-  const [content, setContent] = useState<EmbeddableContent[]>(initialContent);
-  
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: "",
-      url: "",
-    },
+  const [courses, setCourses] = useState<Course[]>(initialCourses);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+  const [isCreatingCourse, setIsCreatingCourse] = useState(false);
+
+  const courseForm = useForm<z.infer<typeof courseFormSchema>>({
+    resolver: zodResolver(courseFormSchema),
+    defaultValues: { title: "", description: "", category: "5. Sınıf" },
+  });
+
+  const contentForm = useForm<z.infer<typeof contentFormSchema>>({
+    resolver: zodResolver(contentFormSchema),
+    defaultValues: { title: "", url: "" },
   });
 
   const getEmbedUrl = (url: string, type: EmbedType): string => {
@@ -63,8 +73,26 @@ export default function AdminPage() {
     }
     return url;
   };
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  
+  function handleCourseSubmit(values: z.infer<typeof courseFormSchema>) {
+      const newCourse: Course = {
+          id: `course-${Date.now()}`,
+          title: values.title,
+          description: values.description,
+          category: values.category,
+          imageUrl: 'https://placehold.co/600x400.png',
+          sections: [],
+          content: [],
+      };
+      setCourses(prev => [...prev, newCourse]);
+      toast({ title: "Başarılı!", description: "Yeni kurs eklendi." });
+      courseForm.reset();
+      setIsCreatingCourse(false);
+  }
+  
+  function handleContentSubmit(values: z.infer<typeof contentFormSchema>) {
+    if (!selectedCourse) return;
+    
     const newContent: EmbeddableContent = {
       id: `content-${Date.now()}`,
       title: values.title,
@@ -73,24 +101,34 @@ export default function AdminPage() {
       embedUrl: getEmbedUrl(values.url, values.type as EmbedType),
     };
 
-    setContent(prev => [...prev, newContent]);
+    setCourses(prev => prev.map(course => 
+      course.id === selectedCourse.id 
+        ? { ...course, content: [...course.content, newContent] } 
+        : course
+    ));
     
-    toast({
-      title: "Başarılı!",
-      description: "Yeni içerik eklendi.",
-    });
-    form.reset();
+    setSelectedCourse(prev => prev ? { ...prev, content: [...prev.content, newContent] } : null);
+    
+    toast({ title: "Başarılı!", description: "Yeni içerik eklendi." });
+    contentForm.reset();
   }
   
-  function handleDelete(id: string) {
-      setContent(prev => prev.filter(item => item.id !== id));
-      toast({
-        title: "Başarılı!",
-        description: "İçerik silindi.",
-        variant: "destructive"
-      });
+  function handleDeleteContent(contentId: string) {
+    if (!selectedCourse) return;
+    
+    const updatedContent = selectedCourse.content.filter(item => item.id !== contentId);
+    
+    setCourses(prev => prev.map(course => 
+      course.id === selectedCourse.id 
+        ? { ...course, content: updatedContent } 
+        : course
+    ));
+    
+    setSelectedCourse(prev => prev ? { ...prev, content: updatedContent } : null);
+
+    toast({ title: "Başarılı!", description: "İçerik silindi.", variant: "destructive" });
   }
-  
+
   const getIcon = (type: EmbedType) => {
     switch(type) {
       case 'youtube': return <Youtube className="h-5 w-5 text-red-500" />;
@@ -98,108 +136,185 @@ export default function AdminPage() {
       case 'iframe': return <LinkIcon className="h-5 w-5 text-gray-500" />;
     }
   }
+  
+  if (selectedCourse) {
+      return (
+        <div className="container py-8">
+            <Button variant="ghost" onClick={() => setSelectedCourse(null)} className="mb-4">
+                <ArrowLeft className="mr-2 h-4 w-4"/>
+                Tüm Kurslara Geri Dön
+            </Button>
+            <h1 className="text-3xl font-bold mb-1">{selectedCourse.title}</h1>
+            <p className="text-muted-foreground mb-6">Kurs içeriğini yönetin.</p>
+             <div className="grid md:grid-cols-3 gap-8">
+                <div className="md:col-span-1">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Yeni İçerik Ekle</CardTitle>
+                      <CardDescription>Bu kurs için video, döküman veya link ekleyin.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <Form {...contentForm}>
+                        <form onSubmit={contentForm.handleSubmit(handleContentSubmit)} className="space-y-4">
+                          <FormField control={contentForm.control} name="title" render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Başlık</FormLabel>
+                                <FormControl><Input placeholder="Örn: Ders 1. Video" {...field} /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                           <FormField control={contentForm.control} name="type" render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>İçerik Türü</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl><SelectTrigger><SelectValue placeholder="Bir tür seçin" /></SelectTrigger></FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="youtube">YouTube Videosu</SelectItem>
+                                    <SelectItem value="drive">Google Drive Dökümanı</SelectItem>
+                                    <SelectItem value="iframe">Diğer (iFrame)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField control={contentForm.control} name="url" render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>URL</FormLabel>
+                                <FormControl><Input placeholder="https://..." {...field} /></FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <Button type="submit" className="w-full"><PlusCircle className="mr-2 h-4 w-4"/>İçerik Ekle</Button>
+                        </form>
+                      </Form>
+                    </CardContent>
+                  </Card>
+                </div>
+                <div className="md:col-span-2">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Mevcut İçerikler</CardTitle>
+                            <CardDescription>Bu kursa eklenmiş tüm içerikler.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {selectedCourse.content.length > 0 ? (
+                                <div className="space-y-4">
+                                    {selectedCourse.content.map(item => (
+                                        <Card key={item.id} className="flex items-center p-4 justify-between">
+                                            <div className="flex items-center gap-4">
+                                                {getIcon(item.type)}
+                                                <div>
+                                                    <p className="font-semibold">{item.title}</p>
+                                                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:underline truncate max-w-xs block">{item.url}</a>
+                                                </div>
+                                            </div>
+                                            <Button variant="ghost" size="icon" onClick={() => handleDeleteContent(item.id)}>
+                                                <Trash2 className="h-4 w-4 text-destructive"/>
+                                            </Button>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-sm text-muted-foreground text-center py-8">Bu kurs için henüz içerik eklenmedi.</p>
+                            )}
+                        </CardContent>
+                    </Card>
+                </div>
+              </div>
+        </div>
+      )
+  }
 
   return (
     <div className="container py-8">
-      <h1 className="text-3xl font-bold mb-6">Admin Paneli - İçerik Yönetimi</h1>
-      <div className="grid md:grid-cols-3 gap-8">
-        <div className="md:col-span-1">
-          <Card>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Admin Paneli - Kurs Yönetimi</h1>
+         <Button onClick={() => setIsCreatingCourse(true)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Yeni Kurs Oluştur
+        </Button>
+      </div>
+
+      {isCreatingCourse ? (
+        <Card className="max-w-2xl mx-auto">
             <CardHeader>
-              <CardTitle>Yeni İçerik Ekle</CardTitle>
-              <CardDescription>Video, döküman veya uygulama linki ekleyin.</CardDescription>
+                <CardTitle>Yeni Kurs Oluştur</CardTitle>
+                <CardDescription>Yeni bir kurs oluşturmak için bilgileri doldurun.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Başlık</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Örn: Matematik Dersi 1. Video" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                   <FormField
-                    control={form.control}
-                    name="type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>İçerik Türü</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Bir tür seçin" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="youtube">YouTube Videosu</SelectItem>
-                            <SelectItem value="drive">Google Drive Dökümanı</SelectItem>
-                            <SelectItem value="iframe">Diğer (iFrame)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="url"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>URL</FormLabel>
-                        <FormControl>
-                          <Input placeholder="https://..." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" className="w-full">
-                    <PlusCircle className="mr-2 h-4 w-4"/>
-                    İçerik Ekle
-                  </Button>
-                </form>
-              </Form>
+                 <Form {...courseForm}>
+                    <form onSubmit={courseForm.handleSubmit(handleCourseSubmit)} className="space-y-4">
+                      <FormField control={courseForm.control} name="title" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Kurs Başlığı</FormLabel>
+                            <FormControl><Input placeholder="Örn: 5. Sınıf Matematik" {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField control={courseForm.control} name="description" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Kurs Açıklaması</FormLabel>
+                            <FormControl><Textarea placeholder="Kursa dair kısa bir açıklama..." {...field} /></FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                       <FormField control={courseForm.control} name="category" render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Kategori / Sınıf</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl><SelectTrigger><SelectValue placeholder="Bir sınıf seçin" /></SelectTrigger></FormControl>
+                              <SelectContent>
+                                <SelectItem value="5. Sınıf">5. Sınıf</SelectItem>
+                                <SelectItem value="6. Sınıf">6. Sınıf</SelectItem>
+                                <SelectItem value="7. Sınıf">7. Sınıf</SelectItem>
+                                <SelectItem value="LGS">LGS</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <Button type="button" variant="ghost" onClick={() => setIsCreatingCourse(false)}>İptal</Button>
+                        <Button type="submit">Kurs Oluştur</Button>
+                      </div>
+                    </form>
+                  </Form>
             </CardContent>
-          </Card>
-        </div>
-        <div className="md:col-span-2">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Mevcut İçerikler</CardTitle>
-                    <CardDescription>Eklediğiniz tüm içeriklerin listesi.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    {content.length > 0 ? (
-                        <div className="space-y-4">
-                            {content.map(item => (
-                                <Card key={item.id} className="flex items-center p-4 justify-between">
-                                    <div className="flex items-center gap-4">
-                                        {getIcon(item.type)}
-                                        <div>
-                                            <p className="font-semibold">{item.title}</p>
-                                            <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:underline truncate">{item.url}</a>
-                                        </div>
-                                    </div>
-                                    <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}>
-                                        <Trash2 className="h-4 w-4 text-destructive"/>
-                                    </Button>
-                                </Card>
-                            ))}
-                        </div>
-                    ) : (
-                        <p className="text-sm text-muted-foreground text-center py-8">Henüz hiç içerik eklenmedi.</p>
-                    )}
-                </CardContent>
-            </Card>
-        </div>
-      </div>
+        </Card>
+      ) : (
+        <Card>
+            <CardHeader>
+                <CardTitle>Mevcut Kurslar</CardTitle>
+                <CardDescription>İçerik eklemek veya düzenlemek için bir kurs seçin.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                {courses.length > 0 ? (
+                    <div className="space-y-4">
+                        {courses.map(course => (
+                            <Card key={course.id} className="flex items-center p-4 justify-between">
+                                <div>
+                                    <p className="font-semibold">{course.title}</p>
+                                    <p className="text-xs text-muted-foreground">{course.category} - {course.content.length} içerik</p>
+                                </div>
+                                <Button variant="outline" size="sm" onClick={() => setSelectedCourse(course)}>
+                                    <Edit className="mr-2 h-4 w-4"/>
+                                    İçeriği Yönet
+                                </Button>
+                            </Card>
+                        ))}
+                    </div>
+                ) : (
+                    <p className="text-sm text-muted-foreground text-center py-8">Henüz hiç kurs oluşturulmadı.</p>
+                )}
+            </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
