@@ -33,6 +33,10 @@ export function Header() {
   const navLinks = [
       { href: '/dashboard', label: 'Panelim' },
       { href: '/courses', label: 'Tüm Kurslar' },
+      { href: '/sinif/5', label: '5. Sınıf' },
+      { href: '/sinif/6', label: '6. Sınıf' },
+      { href: '/sinif/7', label: '7. Sınıf' },
+      { href: '/sinif/lgs', label: 'LGS' },
   ]
 
   return (
@@ -44,7 +48,7 @@ export function Header() {
             <span className="font-bold">Eğitim Platformu</span>
           </Link>
         </div>
-         <nav className="hidden md:flex items-center space-x-6 text-sm font-medium ml-6">
+         <nav className="hidden md:flex items-center space-x-4 text-sm font-medium ml-6">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
