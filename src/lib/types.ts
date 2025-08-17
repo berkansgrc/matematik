@@ -30,3 +30,13 @@ export interface UserProgress {
     completedLessons: string[];
   };
 }
+
+export type EmbedType = 'youtube' | 'drive' | 'iframe';
+
+export interface EmbeddableContent {
+  id: string;
+  title: string;
+  type: EmbedType;
+  url: string;
+  embedUrl: string;
+}

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { BookOpen, User as UserIcon, LogOut, LayoutDashboard, Settings, LogIn } from 'lucide-react';
+import { BookOpen, User as UserIcon, LogOut, LayoutDashboard, Settings, LogIn, Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from "@/components/ui/button";
 import {
@@ -90,6 +90,10 @@ export function Header() {
                 <DropdownMenuItem onClick={() => router.push('/profile')}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Profil Ayarları</span>
+                </DropdownMenuItem>
+                 <DropdownMenuItem onClick={() => router.push('/admin')}>
+                  <Shield className="mr-2 h-4 w-4" />
+                  <span>Admin Paneli</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>

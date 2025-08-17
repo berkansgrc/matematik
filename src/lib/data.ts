@@ -1,4 +1,4 @@
-import type { Course } from '@/lib/types';
+import type { Course, EmbeddableContent } from '@/lib/types';
 
 export const courses: Course[] = [
   {
@@ -78,4 +78,21 @@ export const courses: Course[] = [
       },
     ],
   },
+];
+
+export const embeddableContent: EmbeddableContent[] = [
+    {
+        id: 'yt-1',
+        title: 'Örnek YouTube Videosu',
+        type: 'youtube',
+        url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+    },
+    {
+        id: 'gd-1',
+        title: 'Örnek Google Drive Dökümanı',
+        type: 'drive',
+        url: 'https://docs.google.com/document/d/1O5G9-wP2s-G-w_G-s2P-G_w-s2P_G-w_s2P_G-w_s2P/edit',
+        embedUrl: 'https://docs.google.com/document/d/1O5G9-wP2s-G-w_G-s2P-G_w-s2P_G-w_s2P_G-w_s2P/preview'
+    }
 ];
