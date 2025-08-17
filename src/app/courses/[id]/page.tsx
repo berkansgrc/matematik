@@ -3,7 +3,6 @@ import type { Course } from '@/lib/types';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { Book, Clock, Youtube, FileText, Link as LinkIcon } from 'lucide-react';
-import CourseProgress from './course-progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -33,8 +32,8 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
 
   return (
     <div className="container max-w-6xl mx-auto py-8">
-       <div className="grid md:grid-cols-3 gap-8 items-start">
-        <div className="md:col-span-2">
+       <div className="space-y-8">
+        <div>
             <div className="relative aspect-video rounded-lg overflow-hidden mb-6">
                 <Image
                     src={course.imageUrl}
@@ -88,9 +87,6 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
                 </Tabs>
             )}
 
-        </div>
-        <div className="md:col-span-1 sticky top-20">
-            <CourseProgress course={course} />
         </div>
       </div>
     </div>

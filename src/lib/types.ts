@@ -35,9 +35,3 @@ export interface Course {
   sections: Section[];
   content: EmbeddableContent[];
 }
-
-export interface UserProgress {
-  [courseId: string]: {
-    completedLessons: string[];
-  };
-}
