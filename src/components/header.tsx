@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { BookOpen, User as UserIcon, LogOut, LayoutDashboard, Settings } from 'lucide-react';
+import { BookOpen, User as UserIcon, LogOut, LayoutDashboard, Settings, LogIn } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from "@/components/ui/button";
 import {
@@ -39,7 +39,7 @@ export function Header() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
         <div className="mr-4 flex items-center">
-          <Link href="/dashboard" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <BookOpen className="h-6 w-6 text-primary" />
             <span className="font-bold">Eğitim Platformu</span>
           </Link>
@@ -51,7 +51,7 @@ export function Header() {
                 href={link.href}
                 className={cn(
                   "transition-colors hover:text-foreground/80",
-                  pathname === link.href ? "text-foreground" : "text-foreground/60"
+                  pathname.startsWith(link.href) ? "text-foreground" : "text-foreground/60"
                 )}
               >
                 {link.label}
@@ -59,7 +59,7 @@ export function Header() {
             ))}
         </nav>
         <div className="flex flex-1 items-center justify-end space-x-4">
-          {user && (
+          {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
@@ -94,6 +94,11 @@ export function Header() {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          ) : (
+             <Button onClick={() => router.push('/login')}>
+                <LogIn className="mr-2 h-4 w-4" />
+                Login
+            </Button>
           )}
         </div>
       </div>
