@@ -4,15 +4,13 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  "projectId": "eitim-platformu",
-  "appId": "1:645966425899:web:f76c225726d6a3bb4b1f6e",
-  "storageBucket": "eitim-platformu.firebasestorage.app",
-  "apiKey": "AIzaSyBRrZOv0gBHbH4uJyOq5QDH1w5m9MyibyA",
-  "authDomain": "eitim-platformu.firebaseapp.com",
-  "measurementId": "",
-  "messagingSenderId": "645966425899"
+  apiKey: "AIzaSyAf2MGKno0c4oLMZV_OlKdDnQD-jXptQDo",
+  authDomain: "berkan-web.firebaseapp.com",
+  projectId: "berkan-web",
+  storageBucket: "berkan-web.firebasestorage.app",
+  messagingSenderId: "241669274438",
+  appId: "1:241669274438:web:a8fefa8eda3c6dae370347"
 };
-
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
