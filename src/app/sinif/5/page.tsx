@@ -1,6 +1,11 @@
+
+"use client";
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import { getCourses } from '@/lib/course-service';
+import type { Course } from '@/lib/types';
 import {
   Card,
   CardContent,
@@ -11,47 +16,73 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default async function Grade5Page() {
-  const allCourses = await getCourses();
-  const gradeCourses = allCourses.filter(course => course.category === '5. Sınıf');
+export default function Grade5Page() {
+  const [gradeCourses, setGradeCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchCourses() {
+      try {
+        const allCourses = await getCourses();
+        const filteredCourses = allCourses.filter(course => course.category === '5. Sınıf');
+        setGradeCourses(filteredCourses);
+      } catch (error) {
+        console.error("Failed to fetch courses for 5th grade:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchCourses();
+  }, []);
 
   return (
     <div className="container py-8">
       <h1 className="text-3xl font-bold mb-6">5. Sınıf Kursları</h1>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {gradeCourses.map((course) => (
-          <Link href={`/courses/${course.id}`} key={course.id} className="group">
-            <Card className="flex flex-col h-full overflow-hidden transition-all group-hover:shadow-lg group-hover:-translate-y-1">
-              <CardHeader className="p-0">
-                 <div className="aspect-video overflow-hidden">
-                    <Image
-                        src={course.imageUrl}
-                        alt={course.title}
-                        width={600}
-                        height={400}
-                        className="object-cover w-full h-full transition-transform group-hover:scale-105"
-                        data-ai-hint="online course"
-                    />
-                </div>
-              </CardHeader>
-              <CardContent className="flex-1 p-4">
-                <Badge variant="secondary" className="mb-2">{course.category}</Badge>
-                <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">{course.title}</CardTitle>
-                <CardDescription className="mt-2 text-sm">{course.description}</CardDescription>
-              </CardContent>
-              <CardFooter className="p-4 pt-0">
-                  <div className="text-sm font-semibold text-accent flex items-center gap-1">
-                      Kursa Git <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </div>
-              </CardFooter>
-            </Card>
-          </Link>
-        ))}
-        {gradeCourses.length === 0 && (
-          <p className="text-muted-foreground col-span-full">Bu sınıf için henüz kurs bulunmamaktadır.</p>
-        )}
-      </div>
+      {loading ? (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <Skeleton className="h-[350px] w-full" />
+          <Skeleton className="h-[350px] w-full" />
+          <Skeleton className="h-[350px] w-full" />
+          <Skeleton className="h-[350px] w-full" />
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {gradeCourses.length > 0 ? (
+            gradeCourses.map((course) => (
+              <Link href={`/courses/${course.id}`} key={course.id} className="group">
+                <Card className="flex flex-col h-full overflow-hidden transition-all group-hover:shadow-lg group-hover:-translate-y-1">
+                  <CardHeader className="p-0">
+                    <div className="aspect-video overflow-hidden">
+                        <Image
+                            src={course.imageUrl}
+                            alt={course.title}
+                            width={600}
+                            height={400}
+                            className="object-cover w-full h-full transition-transform group-hover:scale-105"
+                            data-ai-hint="online course"
+                        />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-1 p-4">
+                    <Badge variant="secondary" className="mb-2">{course.category}</Badge>
+                    <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">{course.title}</CardTitle>
+                    <CardDescription className="mt-2 text-sm">{course.description}</CardDescription>
+                  </CardContent>
+                  <CardFooter className="p-4 pt-0">
+                      <div className="text-sm font-semibold text-accent flex items-center gap-1">
+                          Kursa Git <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </div>
+                  </CardFooter>
+                </Card>
+              </Link>
+            ))
+          ) : (
+            <p className="text-muted-foreground col-span-full">Bu sınıf için henüz kurs bulunmamaktadır.</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
