@@ -57,16 +57,21 @@ export default function RegisterPage() {
       await register(values.name, values.email, values.password);
       toast({
         title: "Başarılı",
-        description: "Hesabınız oluşturuldu.",
+        description: "Hesabınız oluşturuldu. Panele yönlendiriliyorsunuz.",
       });
       router.push('/dashboard');
     } catch (error: any) {
-      toast({
+        let errorMessage = "Beklenmedik bir hata oluştu.";
+        if (error.code === 'auth/email-already-in-use') {
+            errorMessage = "Bu e-posta adresi zaten kullanılıyor.";
+        }
+       toast({
         variant: "destructive",
         title: "Kayıt Başarısız",
-        description: error.message || "Beklenmedik bir hata oluştu.",
+        description: errorMessage,
       });
-      setIsLoading(false);
+    } finally {
+        setIsLoading(false);
     }
   }
 
@@ -117,7 +122,7 @@ export default function RegisterPage() {
                   <FormItem>
                     <FormLabel>Şifre</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input type="password" placeholder="********" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

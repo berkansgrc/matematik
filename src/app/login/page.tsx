@@ -55,12 +55,17 @@ export default function LoginPage() {
       await login(values.email, values.password);
       router.push('/dashboard');
     } catch (error: any) {
+      let errorMessage = "Beklenmedik bir hata oluştu.";
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+          errorMessage = "E-posta veya şifre hatalı.";
+      }
       toast({
         variant: "destructive",
         title: "Giriş Başarısız",
-        description: error.message || "Beklenmedik bir hata oluştu.",
+        description: errorMessage,
       });
-      setIsLoading(false);
+    } finally {
+        setIsLoading(false);
     }
   }
 
@@ -73,7 +78,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">Giriş Yap</CardTitle>
-          <CardDescription>Hesabınıza giriş yapmak için e-postanızı girin. <br/> Giriş için <code className='font-mono bg-muted px-1 rounded-sm'>demo@example.com</code> kullanın.</CardDescription>
+          <CardDescription>Hesabınıza giriş yapmak için e-postanızı ve şifrenizi girin.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -98,7 +103,7 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Şifre</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input type="password" placeholder="********" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

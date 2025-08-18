@@ -2,13 +2,23 @@
 
 import type { ReactNode } from "react";
 import React, { createContext, useState, useEffect } from 'react';
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  signOut,
+  updateProfile,
+  type User as FirebaseUser
+} from "firebase/auth";
+import { auth } from '@/lib/firebase';
 import type { User } from '@/lib/types';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password?: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   register: (name: string, email: string, password?: string) => Promise<void>;
 }
 
@@ -19,47 +29,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
+      if (firebaseUser) {
+        setUser({
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || 'Kullanıcı',
+          email: firebaseUser.email || '',
+        });
+      } else {
+        setUser(null);
       }
-    } catch (error) {
-      console.error("Kullanıcı verisi localStorage'dan okunurken hata oluştu", error);
-    } finally {
       setLoading(false);
-    }
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const login = async (email: string) => {
-    return new Promise<void>((resolve, reject) => {
-      setTimeout(() => {
-        if (email === 'demo@example.com') {
-          const demoUser: User = { id: '1', name: 'Demo Kullanıcı', email: 'demo@example.com' };
-          setUser(demoUser);
-          localStorage.setItem('user', JSON.stringify(demoUser));
-          resolve();
-        } else {
-          reject(new Error('Geçersiz kimlik bilgileri. demo@example.com ile deneyin.'));
-        }
-      }, 500);
-    });
+  const login = async (email: string, password?: string) => {
+    if (!password) {
+      throw new Error("Şifre gereklidir.");
+    }
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+  const logout = async () => {
+    await signOut(auth);
   };
 
-  const register = async (name: string, email: string) => {
-     return new Promise<void>((resolve) => {
-      setTimeout(() => {
-        const newUser: User = { id: Date.now().toString(), name, email };
-        setUser(newUser);
-        localStorage.setItem('user', JSON.stringify(newUser));
-        resolve();
-      }, 500);
-    });
+  const register = async (name: string, email: string, password?: string) => {
+    if (!password) {
+      throw new Error("Şifre gereklidir.");
+    }
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    if (userCredential.user) {
+        await updateProfile(userCredential.user, { displayName: name });
+         setUser({
+          id: userCredential.user.uid,
+          name: name,
+          email: email,
+        });
+    }
   };
 
   const value = { user, loading, login, logout, register };

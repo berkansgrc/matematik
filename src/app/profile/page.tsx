@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -30,17 +31,26 @@ export default function ProfilePage() {
   const form = useForm<z.infer<typeof profileFormSchema>>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      name: user?.name || "",
-      email: user?.email || "",
+      name: "",
+      email: "",
     },
   });
+
+  useEffect(() => {
+    if (user) {
+      form.reset({
+        name: user.name || "",
+        email: user.email || "",
+      });
+    }
+  }, [user, form]);
 
   function onSubmit(values: z.infer<typeof profileFormSchema>) {
     // Profil güncelleme mantığı burada olacak
     console.log(values);
     toast({
       title: "Başarılı",
-      description: "Profiliniz güncellendi.",
+      description: "Profiliniz güncellendi (simülasyon).",
     });
   }
   
@@ -89,7 +99,7 @@ export default function ProfilePage() {
                   <FormItem>
                     <FormLabel>E-posta</FormLabel>
                     <FormControl>
-                      <Input placeholder="m@example.com" {...field} />
+                      <Input placeholder="m@example.com" {...field} disabled />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

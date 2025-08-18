@@ -21,8 +21,8 @@ export function Header() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.push('/');
   };
 
@@ -55,7 +55,7 @@ export function Header() {
                 href={link.href}
                 className={cn(
                   "transition-colors hover:text-foreground/80",
-                  pathname.startsWith(link.href) ? "text-foreground" : "text-foreground/60"
+                  (pathname === link.href || (link.href !== '/dashboard' && pathname.startsWith(link.href))) ? "text-foreground" : "text-foreground/60"
                 )}
               >
                 {link.label}
