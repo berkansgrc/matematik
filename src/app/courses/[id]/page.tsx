@@ -1,4 +1,4 @@
-import { courses } from '@/lib/data';
+import { getCourse, getCourses } from '@/lib/course-service';
 import type { Course } from '@/lib/types';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -6,9 +6,6 @@ import { Book, Clock, Youtube, FileText, Link as LinkIcon } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from '@/components/ui/card';
 
-async function getCourse(id: string): Promise<Course | undefined> {
-  return courses.find((course) => course.id === id);
-}
 
 const getIcon = (type: string) => {
     switch(type) {
@@ -56,7 +53,7 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
             </div>
             <p className="text-lg text-muted-foreground mb-8">{course.description}</p>
             
-            {course.content.length > 0 && (
+            {course.content && course.content.length > 0 && (
                 <Tabs defaultValue={course.content[0].id} className="w-full">
                     <TabsList className="grid w-full grid-cols-3 mb-4">
                         {course.content.map(item => (
@@ -95,6 +92,7 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
 
 // Generate static paths for all courses
 export async function generateStaticParams() {
+  const courses = await getCourses();
   return courses.map((course) => ({
     id: course.id,
   }));

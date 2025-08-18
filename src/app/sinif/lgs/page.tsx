@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { courses } from '@/lib/data';
+import { getCourses } from '@/lib/course-service';
 import {
   Card,
   CardContent,
@@ -12,8 +12,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
 
-export default function LgsPage() {
-  const gradeCourses = courses.filter(course => course.category === 'LGS');
+export default async function LgsPage() {
+    const allCourses = await getCourses();
+    const gradeCourses = allCourses.filter(course => course.category === 'LGS');
 
   return (
     <div className="container py-8">

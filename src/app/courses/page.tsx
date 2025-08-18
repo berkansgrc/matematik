@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { courses } from '@/lib/data';
+import { getCourses } from '@/lib/course-service';
 import {
   Card,
   CardContent,
@@ -12,7 +12,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
 
-export default function CoursesPage() {
+export default async function CoursesPage() {
+  const courses = await getCourses();
+  
   return (
     <div className="container py-8">
       <h1 className="text-3xl font-bold mb-6">Tüm Kurslar</h1>

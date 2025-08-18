@@ -1,10 +1,11 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { getCourses, addCourse, updateCourse } from '@/lib/course-service';
 import { 
   Card, 
   CardContent, 
@@ -31,9 +32,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from "@/hooks/use-toast";
-import { courses as initialCourses } from '@/lib/data';
 import type { Course, EmbeddableContent, EmbedType } from '@/lib/types';
-import { Youtube, FileText, Link as LinkIcon, PlusCircle, Trash2, Edit, ArrowLeft } from 'lucide-react';
+import { Youtube, FileText, Link as LinkIcon, PlusCircle, Trash2, Edit, ArrowLeft, Loader2 } from 'lucide-react';
 
 const courseFormSchema = z.object({
   title: z.string().min(3, { message: "Başlık en az 3 karakter olmalıdır." }),
@@ -49,9 +49,22 @@ const contentFormSchema = z.object({
 
 export default function AdminPage() {
   const { toast } = useToast();
-  const [courses, setCourses] = useState<Course[]>(initialCourses);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isCreatingCourse, setIsCreatingCourse] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    async function fetchCourses() {
+      setIsLoading(true);
+      const fetchedCourses = await getCourses();
+      setCourses(fetchedCourses);
+      setIsLoading(false);
+    }
+    fetchCourses();
+  }, []);
+  
 
   const courseForm = useForm<z.infer<typeof courseFormSchema>>({
     resolver: zodResolver(courseFormSchema),
@@ -69,29 +82,37 @@ export default function AdminPage() {
       return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
     }
     if (type === 'drive') {
-      return url.replace('/edit', '/preview');
+      return url.replace('/view', '/preview').replace('/edit', '/preview');
     }
     return url;
   };
   
-  function handleCourseSubmit(values: z.infer<typeof courseFormSchema>) {
-      const newCourse: Course = {
-          id: `course-${Date.now()}`,
-          title: values.title,
-          description: values.description,
-          category: values.category,
-          imageUrl: 'https://placehold.co/600x400.png',
-          sections: [],
-          content: [],
-      };
-      setCourses(prev => [...prev, newCourse]);
-      toast({ title: "Başarılı!", description: "Yeni kurs eklendi." });
-      courseForm.reset();
-      setIsCreatingCourse(false);
+  async function handleCourseSubmit(values: z.infer<typeof courseFormSchema>) {
+      setIsSubmitting(true);
+      try {
+        const newCourseData = {
+            title: values.title,
+            description: values.description,
+            category: values.category,
+            imageUrl: 'https://placehold.co/600x400.png',
+            sections: [],
+        };
+        const newCourseId = await addCourse(newCourseData);
+        const newCourse = { id: newCourseId, ...newCourseData, content: [] };
+        setCourses(prev => [...prev, newCourse]);
+        toast({ title: "Başarılı!", description: "Yeni kurs eklendi." });
+        courseForm.reset();
+        setIsCreatingCourse(false);
+      } catch (error) {
+        toast({ title: "Hata!", description: "Kurs eklenirken bir sorun oluştu.", variant: "destructive" });
+      } finally {
+        setIsSubmitting(false);
+      }
   }
   
-  function handleContentSubmit(values: z.infer<typeof contentFormSchema>) {
+  async function handleContentSubmit(values: z.infer<typeof contentFormSchema>) {
     if (!selectedCourse) return;
+    setIsSubmitting(true);
     
     const newContent: EmbeddableContent = {
       id: `content-${Date.now()}`,
@@ -101,32 +122,51 @@ export default function AdminPage() {
       embedUrl: getEmbedUrl(values.url, values.type as EmbedType),
     };
 
-    setCourses(prev => prev.map(course => 
-      course.id === selectedCourse.id 
-        ? { ...course, content: [...course.content, newContent] } 
-        : course
-    ));
-    
-    setSelectedCourse(prev => prev ? { ...prev, content: [...prev.content, newContent] } : null);
-    
-    toast({ title: "Başarılı!", description: "Yeni içerik eklendi." });
-    contentForm.reset();
+    const updatedContent = [...(selectedCourse.content || []), newContent];
+
+    try {
+        await updateCourse(selectedCourse.id, { content: updatedContent });
+        
+        const updatedCourse = { ...selectedCourse, content: updatedContent };
+
+        setCourses(prev => prev.map(course => 
+          course.id === selectedCourse.id 
+            ? updatedCourse
+            : course
+        ));
+        
+        setSelectedCourse(updatedCourse);
+        
+        toast({ title: "Başarılı!", description: "Yeni içerik eklendi." });
+        contentForm.reset();
+    } catch(error) {
+         toast({ title: "Hata!", description: "İçerik eklenirken bir sorun oluştu.", variant: "destructive" });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
   
-  function handleDeleteContent(contentId: string) {
+  async function handleDeleteContent(contentId: string) {
     if (!selectedCourse) return;
     
     const updatedContent = selectedCourse.content.filter(item => item.id !== contentId);
-    
-    setCourses(prev => prev.map(course => 
-      course.id === selectedCourse.id 
-        ? { ...course, content: updatedContent } 
-        : course
-    ));
-    
-    setSelectedCourse(prev => prev ? { ...prev, content: updatedContent } : null);
 
-    toast({ title: "Başarılı!", description: "İçerik silindi.", variant: "destructive" });
+    try {
+        await updateCourse(selectedCourse.id, { content: updatedContent });
+        const updatedCourse = { ...selectedCourse, content: updatedContent };
+
+        setCourses(prev => prev.map(course => 
+        course.id === selectedCourse.id 
+            ? updatedCourse 
+            : course
+        ));
+        
+        setSelectedCourse(updatedCourse);
+
+        toast({ title: "Başarılı!", description: "İçerik silindi.", variant: "destructive" });
+    } catch (error) {
+        toast({ title: "Hata!", description: "İçerik silinirken bir sorun oluştu.", variant: "destructive" });
+    }
   }
 
   const getIcon = (type: EmbedType) => {
@@ -187,7 +227,10 @@ export default function AdminPage() {
                               </FormItem>
                             )}
                           />
-                          <Button type="submit" className="w-full"><PlusCircle className="mr-2 h-4 w-4"/>İçerik Ekle</Button>
+                          <Button type="submit" className="w-full" disabled={isSubmitting}>
+                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4"/>}
+                            İçerik Ekle
+                          </Button>
                         </form>
                       </Form>
                     </CardContent>
@@ -200,7 +243,7 @@ export default function AdminPage() {
                             <CardDescription>Bu kursa eklenmiş tüm içerikler.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            {selectedCourse.content.length > 0 ? (
+                            {selectedCourse.content && selectedCourse.content.length > 0 ? (
                                 <div className="space-y-4">
                                     {selectedCourse.content.map(item => (
                                         <Card key={item.id} className="flex items-center p-4 justify-between">
@@ -281,7 +324,10 @@ export default function AdminPage() {
                       />
                       <div className="flex gap-2 justify-end">
                         <Button type="button" variant="ghost" onClick={() => setIsCreatingCourse(false)}>İptal</Button>
-                        <Button type="submit">Kurs Oluştur</Button>
+                        <Button type="submit" disabled={isSubmitting}>
+                         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Kurs Oluştur
+                        </Button>
                       </div>
                     </form>
                   </Form>
@@ -294,13 +340,17 @@ export default function AdminPage() {
                 <CardDescription>İçerik eklemek veya düzenlemek için bir kurs seçin.</CardDescription>
             </CardHeader>
             <CardContent>
-                {courses.length > 0 ? (
+                {isLoading ? (
+                    <div className="flex justify-center items-center py-8">
+                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    </div>
+                ) : courses.length > 0 ? (
                     <div className="space-y-4">
                         {courses.map(course => (
                             <Card key={course.id} className="flex items-center p-4 justify-between">
                                 <div>
                                     <p className="font-semibold">{course.title}</p>
-                                    <p className="text-xs text-muted-foreground">{course.category} - {course.content.length} içerik</p>
+                                    <p className="text-xs text-muted-foreground">{course.category} - {course.content?.length || 0} içerik</p>
                                 </div>
                                 <Button variant="outline" size="sm" onClick={() => setSelectedCourse(course)}>
                                     <Edit className="mr-2 h-4 w-4"/>

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { courses } from '@/lib/data';
+import { getCourses } from '@/lib/course-service';
 import {
   Card,
   CardContent,
@@ -12,8 +12,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
 
-export default function Grade5Page() {
-  const gradeCourses = courses.filter(course => course.category === '5. Sınıf');
+export default async function Grade5Page() {
+  const allCourses = await getCourses();
+  const gradeCourses = allCourses.filter(course => course.category === '5. Sınıf');
 
   return (
     <div className="container py-8">

@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { courses } from '@/lib/data';
+import { getCourses } from '@/lib/course-service';
 import {
   Card,
   CardContent,
@@ -13,7 +13,9 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
 import { Header } from '@/components/header';
 
-export default function CoursesPage() {
+export default async function CoursesPage() {
+  const courses = await getCourses();
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
