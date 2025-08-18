@@ -12,16 +12,18 @@ export default function AppLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
+    // If not loading and not an admin, redirect to home page.
+    if (!loading && !isAdmin) {
+      router.push('/');
     }
-  }, [user, loading, router]);
+  }, [user, loading, isAdmin, router]);
 
-  if (loading || !user) {
+  // Show skeleton loader while checking auth state or if user is not an admin (before redirect)
+  if (loading || !isAdmin) {
     return (
        <div className="flex flex-col min-h-screen">
          <header className="sticky top-0 z-50 w-full border-b bg-background">
@@ -47,6 +49,7 @@ export default function AppLayout({
     );
   }
 
+  // If user is an admin, render the admin layout
   return (
     <div className="flex min-h-screen flex-col">
       <Header />

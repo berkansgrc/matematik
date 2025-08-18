@@ -18,7 +18,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from '@/lib/utils';
 
 export function Header() {
-  const { user, logout } = useAuth();
+  const { user, logout, isAdmin } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -90,10 +90,12 @@ export function Header() {
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Profil Ayarları</span>
                 </DropdownMenuItem>
-                 <DropdownMenuItem onClick={() => router.push('/admin')}>
-                  <Shield className="mr-2 h-4 w-4" />
-                  <span>Admin Paneli</span>
-                </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem onClick={() => router.push('/admin')}>
+                    <Shield className="mr-2 h-4 w-4" />
+                    <span>Admin Paneli</span>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
