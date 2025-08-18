@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -32,7 +33,6 @@ export function Header() {
   
   const navLinks = [
       { href: '/dashboard', label: 'Panelim' },
-      { href: '/courses', label: 'Tüm Kurslar' },
       { href: '/sinif/5', label: '5. Sınıf' },
       { href: '/sinif/6', label: '6. Sınıf' },
       { href: '/sinif/7', label: '7. Sınıf' },
