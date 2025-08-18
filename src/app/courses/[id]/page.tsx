@@ -47,11 +47,11 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
             <div className="flex items-center gap-4 text-muted-foreground mb-4">
                 <div className="flex items-center gap-1.5">
                     <Book className="h-4 w-4" />
-                    <span>{totalLessons} lessons</span>
+                    <span>{totalLessons} ders</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                     <Clock className="h-4 w-4" />
-                    <span>Approx. {Math.floor(totalDuration / 60)}h {totalDuration % 60}m</span>
+                    <span>Yaklaşık {Math.floor(totalDuration / 60)}s {totalDuration % 60}d</span>
                 </div>
             </div>
             <p className="text-lg text-muted-foreground mb-8">{course.description}</p>

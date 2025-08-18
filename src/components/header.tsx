@@ -105,7 +105,7 @@ export function Header() {
           ) : (
              <Button onClick={() => router.push('/login')}>
                 <LogIn className="mr-2 h-4 w-4" />
-                Login
+                Giriş Yap
             </Button>
           )}
         </div>

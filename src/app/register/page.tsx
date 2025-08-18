@@ -31,9 +31,9 @@ import { useToast } from "@/hooks/use-toast";
 
 
 const formSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  name: z.string().min(2, { message: "İsim en az 2 karakter olmalıdır." }),
+  email: z.string().email({ message: "Geçersiz e-posta adresi." }),
+  password: z.string().min(6, { message: "Şifre en az 6 karakter olmalıdır." }),
 });
 
 export default function RegisterPage() {
@@ -56,15 +56,15 @@ export default function RegisterPage() {
     try {
       await register(values.name, values.email, values.password);
       toast({
-        title: "Success",
-        description: "Your account has been created.",
+        title: "Başarılı",
+        description: "Hesabınız oluşturuldu.",
       });
       router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Registration Failed",
-        description: error.message || "An unexpected error occurred.",
+        title: "Kayıt Başarısız",
+        description: error.message || "Beklenmedik bir hata oluştu.",
       });
       setIsLoading(false);
     }
@@ -78,8 +78,8 @@ export default function RegisterPage() {
       </div>
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Create an account</CardTitle>
-          <CardDescription>Enter your details below to create your account.</CardDescription>
+          <CardTitle className="text-2xl">Hesap Oluştur</CardTitle>
+          <CardDescription>Hesabınızı oluşturmak için bilgilerinizi girin.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -89,9 +89,9 @@ export default function RegisterPage() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Name</FormLabel>
+                    <FormLabel>İsim</FormLabel>
                     <FormControl>
-                      <Input placeholder="John Doe" {...field} />
+                      <Input placeholder="Adınız Soyadınız" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -102,9 +102,9 @@ export default function RegisterPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>E-posta</FormLabel>
                     <FormControl>
-                      <Input placeholder="m@example.com" {...field} />
+                      <Input placeholder="ornek@eposta.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -115,7 +115,7 @@ export default function RegisterPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Şifre</FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -125,13 +125,13 @@ export default function RegisterPage() {
               />
               <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create account
+                Hesap Oluştur
               </Button>
             </form>
           </Form>
         </CardContent>
         <CardFooter className="text-sm">
-          <p>Already have an account? <Link href="/login" className="underline">Sign in</Link></p>
+          <p>Zaten bir hesabınız var mı? <Link href="/login" className="underline">Giriş Yap</Link></p>
         </CardFooter>
       </Card>
     </main>

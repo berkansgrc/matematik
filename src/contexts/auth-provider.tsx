@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(JSON.parse(storedUser));
       }
     } catch (error) {
-      console.error("Failed to parse user data from localStorage", error);
+      console.error("Kullanıcı verisi localStorage'dan okunurken hata oluştu", error);
     } finally {
       setLoading(false);
     }
@@ -35,12 +35,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return new Promise<void>((resolve, reject) => {
       setTimeout(() => {
         if (email === 'demo@example.com') {
-          const demoUser: User = { id: '1', name: 'Demo User', email: 'demo@example.com' };
+          const demoUser: User = { id: '1', name: 'Demo Kullanıcı', email: 'demo@example.com' };
           setUser(demoUser);
           localStorage.setItem('user', JSON.stringify(demoUser));
           resolve();
         } else {
-          reject(new Error('Invalid credentials. Try demo@example.com'));
+          reject(new Error('Geçersiz kimlik bilgileri. demo@example.com ile deneyin.'));
         }
       }, 500);
     });

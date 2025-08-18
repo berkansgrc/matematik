@@ -31,8 +31,8 @@ import { useToast } from "@/hooks/use-toast";
 
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Invalid email address." }),
-  password: z.string().min(1, { message: "Password is required." }),
+  email: z.string().email({ message: "Geçersiz e-posta adresi." }),
+  password: z.string().min(1, { message: "Şifre gerekli." }),
 });
 
 export default function LoginPage() {
@@ -57,8 +57,8 @@ export default function LoginPage() {
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Login Failed",
-        description: error.message || "An unexpected error occurred.",
+        title: "Giriş Başarısız",
+        description: error.message || "Beklenmedik bir hata oluştu.",
       });
       setIsLoading(false);
     }
@@ -72,8 +72,8 @@ export default function LoginPage() {
         </div>
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>Enter your email below to login to your account. <br/> Use <code className='font-mono bg-muted px-1 rounded-sm'>demo@example.com</code> to log in.</CardDescription>
+          <CardTitle className="text-2xl">Giriş Yap</CardTitle>
+          <CardDescription>Hesabınıza giriş yapmak için e-postanızı girin. <br/> Giriş için <code className='font-mono bg-muted px-1 rounded-sm'>demo@example.com</code> kullanın.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -83,9 +83,9 @@ export default function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>E-posta</FormLabel>
                     <FormControl>
-                      <Input placeholder="m@example.com" {...field} />
+                      <Input placeholder="ornek@eposta.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -96,7 +96,7 @@ export default function LoginPage() {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Şifre</FormLabel>
                     <FormControl>
                       <Input type="password" {...field} />
                     </FormControl>
@@ -106,13 +106,13 @@ export default function LoginPage() {
               />
               <Button type="submit" className="w-full bg-accent hover:bg-accent/90" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Sign In
+                Giriş Yap
               </Button>
             </form>
           </Form>
         </CardContent>
         <CardFooter className="text-sm">
-          <p>Don&apos;t have an account? <Link href="/register" className="underline">Sign up</Link></p>
+          <p>Hesabınız yok mu? <Link href="/register" className="underline">Kayıt Ol</Link></p>
         </CardFooter>
       </Card>
     </main>

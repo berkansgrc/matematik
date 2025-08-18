@@ -19,7 +19,7 @@ export default function CoursesPage() {
       <Header />
       <main className="flex-1">
         <div className="container py-8">
-          <h1 className="text-3xl font-bold mb-6">Our Courses</h1>
+          <h1 className="text-3xl font-bold mb-6">Tüm Kurslar</h1>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {courses.map((course) => (
               <Link href={`/courses/${course.id}`} key={course.id} className="group">
@@ -43,7 +43,7 @@ export default function CoursesPage() {
                   </CardContent>
                   <CardFooter className="p-4 pt-0">
                       <div className="text-sm font-semibold text-accent flex items-center gap-1">
-                          View Course <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          Kursa Git <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </div>
                   </CardFooter>
                 </Card>
