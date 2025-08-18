@@ -49,22 +49,22 @@ export function Header() {
             <span className="font-bold">Eğitim Platformu</span>
           </Link>
         </div>
-        {user && (
-          <nav className="hidden md:flex items-center space-x-4 text-sm font-medium ml-6">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "transition-colors hover:text-foreground/80",
-                    (pathname.startsWith(link.href)) ? "text-foreground" : "text-foreground/60"
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
-          </nav>
-        )}
+        
+        <nav className="hidden md:flex items-center space-x-4 text-sm font-medium ml-6">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "transition-colors hover:text-foreground/80",
+                  (pathname.startsWith(link.href)) ? "text-foreground" : "text-foreground/60"
+                )}
+              >
+                {link.label}
+              </Link>
+            ))}
+        </nav>
+      
         <div className="flex flex-1 items-center justify-end space-x-4">
           {user ? (
             <DropdownMenu>
