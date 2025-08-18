@@ -1,11 +1,15 @@
-import { getCourse, getCourses } from '@/lib/course-service';
+
+"use client";
+
+import { useState, useEffect } from 'react';
+import { getCourse } from '@/lib/course-service';
 import type { Course } from '@/lib/types';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { Book, Clock, Youtube, FileText, Link as LinkIcon } from 'lucide-react';
+import { Book, Clock, Youtube, FileText, Link as LinkIcon, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from '@/components/ui/card';
-
+import { Skeleton } from '@/components/ui/skeleton';
 
 const getIcon = (type: string) => {
     switch(type) {
@@ -15,11 +19,49 @@ const getIcon = (type: string) => {
     }
 }
 
-export default async function CourseDetailPage({ params }: { params: { id: string } }) {
-  const course = await getCourse(params.id);
+export default function CourseDetailPage({ params }: { params: { id: string } }) {
+  const [course, setCourse] = useState<Course | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      const fetchedCourse = await getCourse(params.id);
+      if (fetchedCourse) {
+        setCourse(fetchedCourse);
+      } else {
+        //notFound(); // notFound can only be used in server components
+        console.error("Course not found");
+      }
+      setLoading(false);
+    };
+    fetchCourse();
+  }, [params.id]);
+
+  if (loading) {
+    return (
+        <div className="container max-w-6xl mx-auto py-8">
+            <div className="space-y-8">
+                <div>
+                    <Skeleton className="relative aspect-video rounded-lg w-full mb-6" />
+                    <Skeleton className="h-10 w-3/4 mb-2" />
+                    <div className="flex items-center gap-4 mb-4">
+                       <Skeleton className="h-5 w-24" />
+                       <Skeleton className="h-5 w-24" />
+                    </div>
+                    <Skeleton className="h-20 w-full mb-8" />
+                </div>
+            </div>
+        </div>
+    );
+  }
 
   if (!course) {
-    notFound();
+     return (
+        <div className="container max-w-6xl mx-auto py-8 text-center">
+            <h1 className="text-2xl font-bold">Kurs Bulunamadı</h1>
+            <p className="text-muted-foreground">Aradığınız kurs mevcut değil veya kaldırılmış olabilir.</p>
+        </div>
+    )
   }
 
   const totalLessons = course.sections.reduce((acc, section) => acc + section.lessons.length, 0);
@@ -53,9 +95,9 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
             </div>
             <p className="text-lg text-muted-foreground mb-8">{course.description}</p>
             
-            {course.content && course.content.length > 0 && (
+            {course.content && course.content.length > 0 ? (
                 <Tabs defaultValue={course.content[0].id} className="w-full">
-                    <TabsList className="grid w-full grid-cols-3 mb-4">
+                    <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 mb-4 h-auto">
                         {course.content.map(item => (
                             <TabsTrigger key={item.id} value={item.id} className="flex gap-2 items-center">
                                {getIcon(item.type)} {item.title}
@@ -82,18 +124,14 @@ export default async function CourseDetailPage({ params }: { params: { id: strin
                         </TabsContent>
                     ))}
                 </Tabs>
+            ) : (
+                 <div className="text-center py-8 text-muted-foreground bg-secondary rounded-md">
+                    <p>Bu kurs için henüz içerik eklenmemiş.</p>
+                </div>
             )}
 
         </div>
       </div>
     </div>
   );
-}
-
-// Generate static paths for all courses
-export async function generateStaticParams() {
-  const courses = await getCourses();
-  return courses.map((course) => ({
-    id: course.id,
-  }));
 }
