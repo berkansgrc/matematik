@@ -38,6 +38,8 @@ export function Header() {
       { href: '/sinif/lgs', label: 'LGS' },
   ]
 
+  const isHomePage = pathname === '/';
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
@@ -47,20 +49,22 @@ export function Header() {
             <span className="font-bold">Eğitim Platformu</span>
           </Link>
         </div>
-         <nav className="hidden md:flex items-center space-x-4 text-sm font-medium ml-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "transition-colors hover:text-foreground/80",
-                  (pathname.startsWith(link.href)) ? "text-foreground" : "text-foreground/60"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
-        </nav>
+        {user && (
+          <nav className="hidden md:flex items-center space-x-4 text-sm font-medium ml-6">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "transition-colors hover:text-foreground/80",
+                    (pathname.startsWith(link.href)) ? "text-foreground" : "text-foreground/60"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              ))}
+          </nav>
+        )}
         <div className="flex flex-1 items-center justify-end space-x-4">
           {user ? (
             <DropdownMenu>
@@ -98,10 +102,14 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-             <Button onClick={() => router.push('/login')}>
-                <LogIn className="mr-2 h-4 w-4" />
-                Giriş Yap
-            </Button>
+             <div className="flex items-center gap-2">
+                <Button variant="ghost" onClick={() => router.push('/login')}>
+                    Giriş Yap
+                </Button>
+                 <Button className="bg-accent hover:bg-accent/90" onClick={() => router.push('/register')}>
+                    Kayıt Ol
+                </Button>
+            </div>
           )}
         </div>
       </div>
