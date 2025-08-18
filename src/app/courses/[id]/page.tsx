@@ -19,10 +19,9 @@ const getIcon = (type: string) => {
     }
 }
 
-export default function CourseDetailPage({ params }: { params: { id: string } }) {
+export default function CourseDetailPage({ params: { id: courseId } }: { params: { id: string } }) {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
-  const courseId = params.id;
 
   useEffect(() => {
     const fetchCourse = async () => {
