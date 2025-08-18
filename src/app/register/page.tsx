@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -57,9 +58,9 @@ export default function RegisterPage() {
       await register(values.name, values.email, values.password);
       toast({
         title: "Başarılı",
-        description: "Hesabınız oluşturuldu. Panele yönlendiriliyorsunuz.",
+        description: "Hesabınız oluşturuldu. Ana sayfaya yönlendiriliyorsunuz.",
       });
-      router.push('/dashboard');
+      router.push('/');
     } catch (error: any) {
         let errorMessage = "Beklenmedik bir hata oluştu.";
         if (error.code === 'auth/email-already-in-use') {
