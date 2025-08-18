@@ -32,7 +32,6 @@ export function Header() {
   };
   
   const navLinks = [
-      { href: '/dashboard', label: 'Panelim' },
       { href: '/sinif/5', label: '5. Sınıf' },
       { href: '/sinif/6', label: '6. Sınıf' },
       { href: '/sinif/7', label: '7. Sınıf' },
@@ -55,7 +54,7 @@ export function Header() {
                 href={link.href}
                 className={cn(
                   "transition-colors hover:text-foreground/80",
-                  (pathname === link.href || (link.href !== '/dashboard' && pathname.startsWith(link.href))) ? "text-foreground" : "text-foreground/60"
+                  (pathname.startsWith(link.href)) ? "text-foreground" : "text-foreground/60"
                 )}
               >
                 {link.label}
@@ -83,10 +82,6 @@ export function Header() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                 <DropdownMenuItem onClick={() => router.push('/dashboard')}>
-                  <LayoutDashboard className="mr-2 h-4 w-4" />
-                  <span>Panelim</span>
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push('/profile')}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Profil Ayarları</span>

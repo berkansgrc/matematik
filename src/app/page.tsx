@@ -13,7 +13,7 @@ export default function HomePage() {
   useEffect(() => {
     if (!loading) {
       if (user) {
-        router.replace('/dashboard');
+        router.replace('/sinif/5');
       } else {
         router.replace('/login');
       }
