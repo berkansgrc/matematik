@@ -22,10 +22,13 @@ const getIcon = (type: string) => {
 export default function CourseDetailPage({ params }: { params: { id: string } }) {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
+  const courseId = params.id;
 
   useEffect(() => {
     const fetchCourse = async () => {
-      const fetchedCourse = await getCourse(params.id);
+      if (!courseId) return;
+      setLoading(true);
+      const fetchedCourse = await getCourse(courseId);
       if (fetchedCourse) {
         setCourse(fetchedCourse);
       } else {
@@ -35,7 +38,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
       setLoading(false);
     };
     fetchCourse();
-  }, [params.id]);
+  }, [courseId]);
 
   if (loading) {
     return (
