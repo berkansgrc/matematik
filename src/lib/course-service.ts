@@ -1,12 +1,13 @@
 import { db } from '@/lib/firebase';
 import type { Course } from '@/lib/types';
-import { collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, addDoc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
 
 const coursesCollectionRef = collection(db, 'courses');
 
 export async function getCourses(): Promise<Course[]> {
   try {
-    const querySnapshot = await getDocs(coursesCollectionRef);
+    const q = query(coursesCollectionRef, orderBy('title'));
+    const querySnapshot = await getDocs(q);
     const courses = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
@@ -35,12 +36,9 @@ export async function getCourse(id: string): Promise<Course | undefined> {
   }
 }
 
-export async function addCourse(courseData: Omit<Course, 'id' | 'content'>): Promise<string> {
+export async function addCourse(courseData: Omit<Course, 'id'>): Promise<string> {
   try {
-    const docRef = await addDoc(coursesCollectionRef, {
-        ...courseData,
-        content: [], // Ensure new courses have an empty content array
-    });
+    const docRef = await addDoc(coursesCollectionRef, courseData);
     return docRef.id;
   } catch (error) {
     console.error("Error adding course: ", error);
@@ -48,7 +46,7 @@ export async function addCourse(courseData: Omit<Course, 'id' | 'content'>): Pro
   }
 }
 
-export async function updateCourse(id: string, courseData: Partial<Course>): Promise<void> {
+export async function updateCourse(id: string, courseData: Partial<Omit<Course, 'id'>>): Promise<void> {
    try {
     const courseDoc = doc(db, 'courses', id);
     await updateDoc(courseDoc, courseData);
@@ -57,3 +55,15 @@ export async function updateCourse(id: string, courseData: Partial<Course>): Pro
     throw new Error("Kurs güncellenemedi.");
   }
 }
+
+export async function deleteCourse(id: string): Promise<void> {
+  try {
+    const courseDoc = doc(db, 'courses', id);
+    await deleteDoc(courseDoc);
+  } catch (error) {
+    console.error("Error deleting course: ", error);
+    throw new Error("Kurs silinemedi.");
+  }
+}
+
+    
