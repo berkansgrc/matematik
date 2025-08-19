@@ -5,8 +5,7 @@ import { useState, useEffect } from 'react';
 import { getCourse } from '@/lib/course-service';
 import type { Course } from '@/lib/types';
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
-import { Book, Clock, Youtube, FileText, Link as LinkIcon, Loader2 } from 'lucide-react';
+import { Book, Clock, Youtube, FileText, Link as LinkIcon, Loader2, AppWindow } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,13 +14,14 @@ const getIcon = (type: string) => {
     switch(type) {
       case 'youtube': return <Youtube className="h-5 w-5 text-red-500" />;
       case 'drive': return <FileText className="h-5 w-5 text-blue-500" />;
-      case 'iframe': return <LinkIcon className="h-5 w-5 text-gray-500" />;
+      case 'iframe': return <AppWindow className="h-5 w-5 text-gray-500" />;
     }
 }
 
-export default function CourseDetailPage({ params: { id: courseId } }: { params: { id: string } }) {
+export default function CourseDetailPage({ params }: { params: { id: string } }) {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
+  const courseId = params.id;
 
   useEffect(() => {
     const fetchCourse = async () => {
@@ -31,7 +31,6 @@ export default function CourseDetailPage({ params: { id: courseId } }: { params:
       if (fetchedCourse) {
         setCourse(fetchedCourse);
       } else {
-        //notFound(); // notFound can only be used in server components
         console.error("Course not found");
       }
       setLoading(false);

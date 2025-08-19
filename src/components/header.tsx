@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { BookOpen, User as UserIcon, LogOut, LayoutDashboard, Settings, LogIn, Shield } from 'lucide-react';
+import { BookOpen, User as UserIcon, LogOut, LayoutDashboard, Settings, LogIn, Shield, Home, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from "@/components/ui/button";
 import {
@@ -38,39 +38,50 @@ export function Header() {
       { href: '/sinif/lgs', label: 'LGS' },
   ]
 
-  const isHomePage = pathname === '/';
-
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
-        <div className="mr-4 flex items-center">
+        <div className="mr-auto flex items-center">
           <Link href="/" className="flex items-center gap-2">
-            <BookOpen className="h-6 w-6 text-primary" />
-            <span className="font-bold">Eğitim Platformu</span>
+            <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M42 42H6V6H42V42Z" fill="hsl(var(--primary))" stroke="hsl(var(--primary))" strokeWidth="4" strokeLinejoin="round"/>
+                <path d="M14 14H22V22H14V14Z" fill="hsl(var(--primary-foreground))" stroke="hsl(var(--primary-foreground))" strokeWidth="4" strokeLinejoin="round"/>
+                <path d="M26 26H34V34H26V26Z" fill="hsl(var(--primary-foreground))" stroke="hsl(var(--primary-foreground))" strokeWidth="4" strokeLinejoin="round"/>
+                <path d="M26 14L34 14" stroke="hsl(var(--primary-foreground))" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M14 26L22 26" stroke="hsl(var(--primary-foreground))" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M26 20L34 20" stroke="hsl(var(--primary-foreground))" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M14 32L22 32" stroke="hsl(var(--primary-foreground))" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            <span className="font-bold ml-2 text-lg">Berkan Matematik</span>
           </Link>
         </div>
         
-        <nav className="hidden md:flex items-center space-x-4 text-sm font-medium ml-6">
-            {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "transition-colors hover:text-foreground/80",
-                  (pathname.startsWith(link.href)) ? "text-foreground" : "text-foreground/60"
-                )}
-              >
-                {link.label}
-              </Link>
-            ))}
+        <nav className="flex items-center gap-2 text-sm font-medium">
+             <Button variant="ghost" size="icon" onClick={() => router.push('/')}>
+                <Home className="h-5 w-5" />
+             </Button>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost">
+                        Sınıflar <ChevronDown className="h-4 w-4 ml-1" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    {navLinks.map((link) => (
+                      <DropdownMenuItem key={link.href} onClick={() => router.push(link.href)}>
+                        {link.label}
+                      </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
         </nav>
       
-        <div className="flex flex-1 items-center justify-end space-x-4">
+        <div className="flex items-center justify-end space-x-2 pl-4">
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                  <Avatar className="h-8 w-8">
+                <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                  <Avatar className="h-9 w-9">
                     <AvatarImage src={`https://api.dicebear.com/8.x/initials/svg?seed=${user.name}`} alt={user.name} />
                     <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                   </Avatar>

@@ -2,21 +2,14 @@
 "use client";
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { getCourses } from '@/lib/course-service';
-import type { Course } from '@/lib/types';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ArrowRight } from "lucide-react";
+import type { Course, EmbeddableContent } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, BookOpen, Video, FileText, AppWindow } from "lucide-react";
+import { Button } from '@/components/ui/button';
 
 export default function Grade5Page() {
   const [gradeCourses, setGradeCourses] = useState<Course[]>([]);
@@ -36,53 +29,107 @@ export default function Grade5Page() {
     }
     fetchCourses();
   }, []);
+  
+  const renderContent = (content: EmbeddableContent[]) => {
+    const videos = content.filter(c => c.type === 'youtube');
+    const documents = content.filter(c => c.type === 'drive');
+    const applications = content.filter(c => c.type === 'iframe');
+
+    return (
+      <Tabs defaultValue="videos" className="w-full">
+        <TabsList className="grid w-full grid-cols-3 bg-secondary/80">
+          <TabsTrigger value="videos" disabled={videos.length === 0}><Video className="mr-2 h-4 w-4"/>Videolar</TabsTrigger>
+          <TabsTrigger value="documents" disabled={documents.length === 0}><FileText className="mr-2 h-4 w-4"/>Dökümanlar</TabsTrigger>
+          <TabsTrigger value="applications" disabled={applications.length === 0}><AppWindow className="mr-2 h-4 w-4"/>Uygulamalar</TabsTrigger>
+        </TabsList>
+        <TabsContent value="videos" className="pt-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {videos.map(item => (
+                    <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" className="block p-4 border rounded-lg hover:bg-accent/50 transition-colors">
+                        <div className="flex items-center gap-3">
+                            <Video className="h-5 w-5 text-red-500"/>
+                            <span className="font-medium">{item.title}</span>
+                        </div>
+                    </a>
+                ))}
+            </div>
+        </TabsContent>
+        <TabsContent value="documents" className="pt-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {documents.map(item => (
+                    <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" className="block p-4 border rounded-lg hover:bg-accent/50 transition-colors">
+                        <div className="flex items-center gap-3">
+                            <FileText className="h-5 w-5 text-blue-500"/>
+                            <span className="font-medium">{item.title}</span>
+                        </div>
+                    </a>
+                ))}
+            </div>
+        </TabsContent>
+        <TabsContent value="applications" className="pt-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {applications.map(item => (
+                    <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" className="block p-4 border rounded-lg hover:bg-accent/50 transition-colors">
+                        <div className="flex items-center gap-3">
+                            <AppWindow className="h-5 w-5 text-gray-500"/>
+                            <span className="font-medium">{item.title}</span>
+                        </div>
+                    </a>
+                ))}
+            </div>
+        </TabsContent>
+      </Tabs>
+    )
+  }
 
   return (
-    <div className="container py-8">
-      <h1 className="text-3xl font-bold mb-6">5. Sınıf Kursları</h1>
-      {loading ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <Skeleton className="h-[350px] w-full" />
-          <Skeleton className="h-[350px] w-full" />
-          <Skeleton className="h-[350px] w-full" />
-          <Skeleton className="h-[350px] w-full" />
+    <div className="bg-secondary/40 min-h-[calc(100vh-3.5rem)]">
+        <div className="container py-8 md:py-12">
+            <div className="mb-8">
+                <Button variant="ghost" asChild className="mb-4">
+                    <Link href="/">
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Tüm Sınıflar
+                    </Link>
+                </Button>
+                <h1 className="text-4xl font-bold text-primary">5. Sınıf Kaynakları</h1>
+                <p className="text-lg text-muted-foreground mt-2">Matematik temellerini sağlamlaştırın.</p>
+            </div>
+
+            {loading ? (
+                <div className="space-y-4">
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                </div>
+            ) : (
+                <Accordion type="multiple" className="space-y-4">
+                    {gradeCourses.length > 0 ? (
+                        gradeCourses.map((course) => (
+                            <AccordionItem value={course.id} key={course.id} className="bg-card border rounded-lg">
+                                <AccordionTrigger className="text-lg font-semibold px-6 py-4 hover:no-underline">
+                                    <div className="flex items-center gap-3">
+                                        <BookOpen className="h-5 w-5 text-primary" />
+                                        {course.title}
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="px-6 pb-4">
+                                    {course.content && course.content.length > 0 ? (
+                                        renderContent(course.content)
+                                    ) : (
+                                        <p className="text-muted-foreground text-center py-4">Bu konu için henüz içerik eklenmemiş.</p>
+                                    )}
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))
+                    ) : (
+                        <div className="text-center py-16 bg-card border rounded-lg">
+                            <p className="text-muted-foreground">Bu sınıf için henüz kurs bulunmamaktadır.</p>
+                        </div>
+                    )}
+                </Accordion>
+            )}
         </div>
-      ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {gradeCourses.length > 0 ? (
-            gradeCourses.map((course) => (
-              <Link href={`/courses/${course.id}`} key={course.id} className="group">
-                <Card className="flex flex-col h-full overflow-hidden transition-all group-hover:shadow-lg group-hover:-translate-y-1">
-                  <CardHeader className="p-0">
-                    <div className="aspect-video overflow-hidden">
-                        <Image
-                            src={course.imageUrl}
-                            alt={course.title}
-                            width={600}
-                            height={400}
-                            className="object-cover w-full h-full transition-transform group-hover:scale-105"
-                            data-ai-hint="online course"
-                        />
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-1 p-4">
-                    <Badge variant="secondary" className="mb-2">{course.category}</Badge>
-                    <CardTitle className="text-lg leading-tight group-hover:text-primary transition-colors">{course.title}</CardTitle>
-                    <CardDescription className="mt-2 text-sm">{course.description}</CardDescription>
-                  </CardContent>
-                  <CardFooter className="p-4 pt-0">
-                      <div className="text-sm font-semibold text-accent flex items-center gap-1">
-                          Kursa Git <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                      </div>
-                  </CardFooter>
-                </Card>
-              </Link>
-            ))
-          ) : (
-            <p className="text-muted-foreground col-span-full">Bu sınıf için henüz kurs bulunmamaktadır.</p>
-          )}
-        </div>
-      )}
     </div>
   );
 }
