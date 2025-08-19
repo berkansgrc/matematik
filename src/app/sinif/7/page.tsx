@@ -30,7 +30,7 @@ export default function Grade7Page() {
         fetchCourses();
     }, []);
 
-  const renderContent = (content: EmbeddableContent[]) => {
+  const renderContent = (courseId: string, content: EmbeddableContent[]) => {
     const videos = content.filter(c => c.type === 'youtube');
     const documents = content.filter(c => c.type === 'drive');
     const applications = content.filter(c => c.type === 'iframe');
@@ -69,12 +69,12 @@ export default function Grade7Page() {
         <TabsContent value="applications" className="pt-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {applications.map(item => (
-                    <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" className="block p-4 border rounded-lg hover:bg-accent/50 transition-colors">
+                    <Link key={item.id} href={`/courses/${courseId}?contentId=${item.id}`} className="block p-4 border rounded-lg hover:bg-accent/50 transition-colors">
                         <div className="flex items-center gap-3">
                             <AppWindow className="h-5 w-5 text-gray-500"/>
                             <span className="font-medium">{item.title}</span>
                         </div>
-                    </a>
+                    </Link>
                 ))}
             </div>
         </TabsContent>
@@ -89,7 +89,7 @@ export default function Grade7Page() {
                 <Button variant="ghost" asChild className="mb-4">
                     <Link href="/">
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Tüm Sınıflar
+                        Ana Sayfa
                     </Link>
                 </Button>
                 <h1 className="text-4xl font-bold text-primary">7. Sınıf Kaynakları</h1>
@@ -115,7 +115,7 @@ export default function Grade7Page() {
                                 </AccordionTrigger>
                                 <AccordionContent className="px-6 pb-4">
                                      {course.content && course.content.length > 0 ? (
-                                        renderContent(course.content)
+                                        renderContent(course.id, course.content)
                                     ) : (
                                         <p className="text-muted-foreground text-center py-4">Bu konu için henüz içerik eklenmemiş.</p>
                                     )}

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { getCourse } from '@/lib/course-service';
 import type { Course } from '@/lib/types';
 import Image from 'next/image';
@@ -21,6 +22,8 @@ const getIcon = (type: string) => {
 export default function CourseDetailPage({ params }: { params: { id: string } }) {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
+  const searchParams = useSearchParams();
+  const contentId = searchParams.get('contentId');
   const courseId = params.id;
 
   useEffect(() => {
@@ -69,6 +72,8 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
   const totalDuration = course.sections.reduce((acc, section) => {
     return acc + section.lessons.reduce((lessonAcc, lesson) => lessonAcc + lesson.duration, 0);
   }, 0);
+  
+  const defaultTab = contentId || course.content[0]?.id;
 
   return (
     <div className="container max-w-6xl mx-auto py-8">
@@ -97,7 +102,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
             <p className="text-lg text-muted-foreground mb-8">{course.description}</p>
             
             {course.content && course.content.length > 0 ? (
-                <Tabs defaultValue={course.content[0].id} className="w-full">
+                <Tabs defaultValue={defaultTab} className="w-full">
                     <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 mb-4 h-auto">
                         {course.content.map(item => (
                             <TabsTrigger key={item.id} value={item.id} className="flex gap-2 items-center">
