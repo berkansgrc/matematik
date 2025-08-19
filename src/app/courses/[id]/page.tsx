@@ -25,9 +25,9 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
   const [loading, setLoading] = useState(true);
   const searchParams = useSearchParams();
   const contentId = searchParams.get('contentId');
-  const courseId = params.id;
-
+  
   useEffect(() => {
+    const courseId = params.id;
     const fetchCourse = async () => {
       if (!courseId) return;
       setLoading(true);
@@ -40,7 +40,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
       setLoading(false);
     };
     fetchCourse();
-  }, [courseId]);
+  }, [params]);
 
   if (loading) {
     return (
