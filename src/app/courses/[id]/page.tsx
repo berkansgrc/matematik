@@ -10,6 +10,7 @@ import { Book, Clock, Youtube, FileText, Link as LinkIcon, Loader2, AppWindow } 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Header } from '@/components/header';
 
 const getIcon = (type: string) => {
     switch(type) {
@@ -70,14 +71,14 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
   
   const activeContent = contentId ? course.content.find(c => c.id === contentId) : null;
 
-  // If a specific contentId is provided, show only the iframe and no other course details.
+  // If a specific contentId is provided, show only the iframe and the header.
   if (activeContent) {
     return (
-        <div className="w-full h-[calc(100vh-3.5rem)]">
+        <div className="flex flex-col h-screen">
+             <Header />
              <iframe
                 src={activeContent.embedUrl}
-                width="100%"
-                height="100%"
+                className="flex-1 w-full h-full"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 title={activeContent.title}
