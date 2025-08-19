@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { ReactNode } from "react";
@@ -11,11 +12,10 @@ import {
   updateProfile,
   type User as FirebaseUser
 } from "firebase/auth";
-import { auth } from '@/lib/firebase';
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { auth, db } from '@/lib/firebase';
 import type { User } from '@/lib/types';
 
-// IMPORTANT: Replace this with your actual admin's email address.
-const ADMIN_EMAIL = "admin@example.com";
 
 interface AuthContextType {
   user: User | null;
@@ -34,9 +34,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser: FirebaseUser | null) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
-        const isUserAdmin = firebaseUser.email === ADMIN_EMAIL;
+        // Fetch user role from Firestore
+        const userDocRef = doc(db, "user", firebaseUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        let isUserAdmin = false;
+        if (userDocSnap.exists()) {
+            const userData = userDocSnap.data();
+            if (userData.role === 'admin') {
+                isUserAdmin = true;
+            }
+        }
+
         setUser({
           id: firebaseUser.uid,
           name: firebaseUser.displayName || 'Kullanıcı',
@@ -70,16 +80,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error("Şifre gereklidir.");
     }
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    if (userCredential.user) {
-        await updateProfile(userCredential.user, { displayName: name });
-        const isUserAdmin = userCredential.user.email === ADMIN_EMAIL;
-         setUser({
-          id: userCredential.user.uid,
+    const newUser = userCredential.user;
+    if (newUser) {
+        await updateProfile(newUser, { displayName: name });
+        
+        // Create user document in Firestore
+        const userDocRef = doc(db, "user", newUser.uid);
+        await setDoc(userDocRef, {
+            'e-mail': email,
+            role: 'user' // Default role for new users
+        });
+
+        setUser({
+          id: newUser.uid,
           name: name,
           email: email,
-          isAdmin: isUserAdmin,
+          isAdmin: false, // New users are not admins by default
         });
-        setIsAdmin(isUserAdmin);
+        setIsAdmin(false);
     }
   };
 
