@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
       if (firebaseUser) {
         // Fetch user role from Firestore
-        const userDocRef = doc(db, "user", firebaseUser.uid);
+        const userDocRef = doc(db, "users", firebaseUser.uid);
         const userDocSnap = await getDoc(userDocRef);
         let isUserAdmin = false;
         if (userDocSnap.exists()) {
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         await updateProfile(newUser, { displayName: name });
         
         // Create user document in Firestore
-        const userDocRef = doc(db, "user", newUser.uid);
+        const userDocRef = doc(db, "users", newUser.uid);
         await setDoc(userDocRef, {
             'e-mail': email,
             role: 'user' // Default role for new users
