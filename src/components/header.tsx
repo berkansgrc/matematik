@@ -2,6 +2,7 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { BookOpen, User as UserIcon, LogOut, LayoutDashboard, Settings, LogIn, Shield, Home, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
@@ -43,16 +44,14 @@ export function Header() {
       <div className="container flex h-14 items-center">
         <div className="mr-auto flex items-center">
           <Link href="/" className="flex items-center gap-2">
-            <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M42 42H6V6H42V42Z" fill="hsl(var(--primary))" stroke="hsl(var(--primary))" strokeWidth="4" strokeLinejoin="round"/>
-                <path d="M14 14H22V22H14V14Z" fill="hsl(var(--primary-foreground))" stroke="hsl(var(--primary-foreground))" strokeWidth="4" strokeLinejoin="round"/>
-                <path d="M26 26H34V34H26V26Z" fill="hsl(var(--primary-foreground))" stroke="hsl(var(--primary-foreground))" strokeWidth="4" strokeLinejoin="round"/>
-                <path d="M26 14L34 14" stroke="hsl(var(--primary-foreground))" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M14 26L22 26" stroke="hsl(var(--primary-foreground))" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M26 20L34 20" stroke="hsl(var(--primary-foreground))" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M14 32L22 32" stroke="hsl(var(--primary-foreground))" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            <span className="font-bold ml-2 text-lg">Berkan Matematik</span>
+            {/* Kendi logonuzu public klasörüne ekleyin ve src, width, height değerlerini güncelleyin */}
+            <Image 
+              src="/logo.png" 
+              alt="Logo" 
+              width={120} 
+              height={30} 
+              className="h-auto"
+            />
           </Link>
         </div>
         
