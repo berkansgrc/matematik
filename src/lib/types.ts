@@ -27,6 +27,11 @@ export interface EmbeddableContent {
   embedUrl: string;
 }
 
+export interface VideoContent extends EmbeddableContent {
+    courseId: string;
+    category: string;
+}
+
 export interface Course {
   id: string;
   title: string;

@@ -1,11 +1,37 @@
 
+"use client";
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/header';
-import { BookOpen, PlayCircle, Rocket, Target } from 'lucide-react';
+import { BookOpen, PlayCircle, Rocket, Target, Video } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { getRecentVideos } from '@/lib/course-service';
+import type { VideoContent } from '@/lib/types';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function HomePage() {
+  const [recentVideos, setRecentVideos] = useState<VideoContent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchRecentVideos() {
+      setLoading(true);
+      const videos = await getRecentVideos(6); // Fetch the 6 most recent videos
+      setRecentVideos(videos);
+      setLoading(false);
+    }
+    fetchRecentVideos();
+  }, []);
+  
+  const getYoutubeThumbnail = (url: string) => {
+      const videoIdMatch = url.match(/(?:v=|\/embed\/|\/)([\w-]{11})(&.*)?$/);
+      return videoIdMatch ? `https://img.youtube.com/vi/${videoIdMatch[1]}/mqdefault.jpg` : 'https://placehold.co/320x180.png';
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <Header />
@@ -43,9 +69,65 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        
+        {/* Recent Videos Section */}
+        <section id="recent-videos" className="w-full py-12 md:py-24 lg:py-32">
+            <div className="container px-4 md:px-6">
+                 <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+                    <div className="space-y-2">
+                        <div className="inline-block rounded-lg bg-secondary px-3 py-1 text-sm">Yeni Videolar</div>
+                        <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">En Son Eklenen Dersler</h2>
+                        <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                          En güncel konu anlatımlarını ve soru çözümlerini kaçırmayın.
+                        </p>
+                    </div>
+                </div>
+                {loading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {[...Array(6)].map((_, i) => (
+                          <div key={i} className="space-y-2">
+                              <Skeleton className="aspect-video w-full rounded-lg" />
+                              <Skeleton className="h-5 w-3/4" />
+                              <Skeleton className="h-4 w-1/4" />
+                          </div>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {recentVideos.map(video => (
+                          <a key={video.id} href={video.url} target="_blank" rel="noopener noreferrer" className="group">
+                              <Card className="overflow-hidden h-full flex flex-col transition-all group-hover:shadow-lg group-hover:-translate-y-1">
+                                  <CardHeader className="p-0 relative aspect-video">
+                                      <Image 
+                                          src={getYoutubeThumbnail(video.url)}
+                                          alt={video.title}
+                                          fill
+                                          className="object-cover transition-transform group-hover:scale-105"
+                                      />
+                                      <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                                         <PlayCircle className="h-12 w-12 text-white/80" />
+                                      </div>
+                                  </CardHeader>
+                                  <CardContent className="p-4 flex-1 flex flex-col">
+                                    <h3 className="font-semibold text-lg leading-tight group-hover:text-primary transition-colors flex-1">{video.title}</h3>
+                                    <div className="flex justify-between items-center mt-2">
+                                        <Badge variant="secondary">{video.category}</Badge>
+                                        <div className="text-sm text-muted-foreground flex items-center gap-1.5">
+                                            <Video className="h-4 w-4" />
+                                            <span>Video Ders</span>
+                                        </div>
+                                    </div>
+                                  </CardContent>
+                              </Card>
+                          </a>
+                      ))}
+                  </div>
+                )}
+            </div>
+        </section>
 
         {/* Features Section */}
-        <section id="features" className="w-full py-12 md:py-24 lg:py-32">
+        <section id="features" className="w-full py-12 md:py-24 lg:py-32 bg-secondary/50">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
               <div className="space-y-2">
@@ -95,7 +177,7 @@ export default function HomePage() {
         </section>
 
         {/* CTA Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-secondary/50">
+        <section className="w-full py-12 md:py-24 lg:py-32">
           <div className="container grid items-center justify-center gap-4 px-4 text-center md:px-6">
             <div className="space-y-3">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight text-primary">
