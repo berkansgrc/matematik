@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { BookOpen, User as UserIcon, LogOut, LayoutDashboard, Settings, LogIn, Shield, Home, ChevronDown } from 'lucide-react';
+import { BookOpen, User as UserIcon, LogOut, LayoutDashboard, Settings, LogIn, Shield, Home, ChevronDown, Sun, Moon } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from "@/components/ui/button";
 import {
@@ -17,11 +17,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from '@/lib/utils';
+import { useTheme } from 'next-themes';
 
 export function Header() {
   const { user, logout, isAdmin } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const { setTheme } = useTheme()
 
   const handleLogout = async () => {
     await logout();
@@ -44,13 +46,12 @@ export function Header() {
       <div className="container flex h-14 items-center">
         <div className="mr-auto flex items-center">
           <Link href="/" className="flex items-center gap-2">
-            {/* Ensure your logo is in the `public` folder and named `logo.png` */}
             <Image 
               src="/logo.png" 
               alt="Logo" 
               width={120} 
               height={30} 
-              className="h-auto w-auto"
+              className="h-auto w-auto object-contain"
             />
           </Link>
         </div>
@@ -76,6 +77,26 @@ export function Header() {
         </nav>
       
         <div className="flex items-center justify-end space-x-2 pl-4">
+           <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <span className="sr-only">Toggle theme</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme("light")}>
+                Açık
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
+                Karanlık
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
+                Sistem
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
