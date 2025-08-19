@@ -4,7 +4,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { getCourse } from '@/lib/course-service';
-import type { Course } from '@/lib/types';
+import type { Course, EmbeddableContent } from '@/lib/types';
 import Image from 'next/image';
 import { Book, Clock, Youtube, FileText, Link as LinkIcon, Loader2, AppWindow } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -67,13 +67,31 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
         </div>
     )
   }
+  
+  const activeContent = contentId ? course.content.find(c => c.id === contentId) : null;
+
+  // If a specific contentId is provided, show only the iframe and no other course details.
+  if (activeContent) {
+    return (
+        <div className="w-full h-[calc(100vh-3.5rem)]">
+             <iframe
+                src={activeContent.embedUrl}
+                width="100%"
+                height="100%"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={activeContent.title}
+            ></iframe>
+        </div>
+    )
+  }
 
   const totalLessons = course.sections.reduce((acc, section) => acc + section.lessons.length, 0);
   const totalDuration = course.sections.reduce((acc, section) => {
     return acc + section.lessons.reduce((lessonAcc, lesson) => lessonAcc + lesson.duration, 0);
   }, 0);
   
-  const defaultTab = contentId || course.content[0]?.id;
+  const defaultTab = course.content[0]?.id;
 
   return (
     <div className="container max-w-6xl mx-auto py-8">
@@ -101,7 +119,7 @@ export default function CourseDetailPage({ params }: { params: { id: string } })
             </div>
             <p className="text-lg text-muted-foreground mb-8">{course.description}</p>
             
-            {course.content && course.content.length > 0 ? (
+            {course.content && course.content.length > 0 && defaultTab ? (
                 <Tabs defaultValue={defaultTab} className="w-full">
                     <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 mb-4 h-auto">
                         {course.content.map(item => (
